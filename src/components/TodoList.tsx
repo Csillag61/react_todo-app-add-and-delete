@@ -9,11 +9,22 @@ type Props = {
   onToggleTodo: (todoId: number) => Promise<void>;
 };
 
-export const TodoList: React.FC<Props> = ({ todos, onToggleTodo }) => {
+export const TodoList: React.FC<Props> = ({
+  todos,
+  onToggleTodo,
+  onDeleteTodo,
+  isDeleting,
+}) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
       {todos.map(todo => (
-        <TodoItem key={todo.id} todo={todo} onToggle={onToggleTodo} />
+        <TodoItem
+          key={todo.id}
+          todo={todo}
+          onToggle={onToggleTodo}
+          onDelete={onDeleteTodo} // Pass the delete function
+          isDeleting={isDeleting === todo.id} // Pass deletion state for the specific todo
+        />
       ))}
     </section>
   );

@@ -13,7 +13,8 @@ import { Footer } from './components/Footer';
 import { ErrorModal } from './components/ErrorModal';
 import { FilterBy } from './types/FilterBy';
 import { Loader } from './components/Loader';
-import { TodoItem } from './components/TodoItem'; // Import TodoItem component
+import { TodoItem } from './components/TodoItem';
+import { AddTodoForm } from './components/AddTodoForm';
 
 const filter = (todos: Todo[], filterBy: FilterBy) => {
   switch (filterBy) {
@@ -154,51 +155,41 @@ export const App: React.FC = () => {
 
   return (
     <div className="todoapp">
-      <h1 className="todoapp__title">todos</h1>
-      <div className="todoapp__content">
-        <Header />
-        <form onSubmit={handleAddTodo}>
-          <input
-            type="text"
-            value={newTodoTitle}
-            placeholder="What needs to be done?"
-            onChange={e => setNewTodoTitle(e.target.value)}
-            disabled={isAdding || loading}
-            autoFocus
+      <Header />
+      <AddTodoForm
+        newTodoTitle={newTodoTitle}
+        setNewTodoTitle={setNewTodoTitle}
+        handleAddTodo={handleAddTodo}
+        isAdding={isAdding}
+      />
+      {loading || isAdding ? (
+        <Loader message="Loading your todos..." />
+      ) : (
+        <>
+          <TodoList
+            todos={filteredTodos}
+            onDeleteTodo={handleDeleteTodo}
+            onToggleTodo={onToggleTodo}
+            isDeleting={isDeleting}
           />
-          <button type="submit" disabled={isAdding || loading}>
-            Add
-          </button>
-        </form>
-        {loading || isAdding ? (
-          <Loader message="Loading your todos..." />
-        ) : todos.length > 0 ? (
-          <>
-            <TodoList
-              todos={filteredTodos}
-              onDeleteTodo={handleDeleteTodo}
-              onToggleTodo={onToggleTodo}
-              isDeleting={isDeleting}
-            />
-            <Footer
-              todos={todos}
-              filterBy={filterBy}
-              setFilterBy={setFilterBy}
-              onClearCompleted={handleClearCompleted}
-              isClearingCompleted={isClearingCompleted}
-            />
-          </>
-        ) : (
-          <p>No todos found. Add a task to get started!</p>
-        )}
-        {tempTodo && (
-          <TodoItem
-            todo={tempTodo}
-            loading={true} // Pass loading state for the spinner
-            onToggle={() => Promise.resolve()} // Provide a dummy onToggle function
+          <Footer
+            todos={todos}
+            filterBy={filterBy}
+            setFilterBy={setFilterBy}
+            onClearCompleted={handleClearCompleted}
+            isClearingCompleted={isClearingCompleted}
           />
-        )}
-      </div>
+        </>
+      )}
+      {tempTodo && (
+        <TodoItem
+          todo={tempTodo}
+          onDelete={() => handleDeleteTodo(tempTodo.id)}
+          isDeleting={isDeleting === tempTodo.id}
+          loading={true}
+          onToggle={() => Promise.resolve()}
+        />
+      )}
       {errorMessage !== Errors.DEFAULT && (
         <ErrorModal
           errorMessage={errorMessage}

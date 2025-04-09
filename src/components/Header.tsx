@@ -8,7 +8,10 @@ export const Header: React.FC = () => {
         type="button"
         className="todoapp__toggle-all active"
         data-cy="ToggleAllButton"
-      />
+        title="Toggle all todos"
+      >
+        Toggle All
+      </button>
 
       {/* Add a todo on form submit */}
       <form>

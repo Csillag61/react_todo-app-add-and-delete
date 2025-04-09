@@ -7,6 +7,7 @@ type Props = {
   loading?: boolean;
   onToggle: (todoId: number) => Promise<void>;
   onDelete?: (todoId: number) => Promise<void>;
+  isDeleting?: boolean;
 };
 
 export const TodoItem: React.FC<Props> = ({
@@ -14,6 +15,7 @@ export const TodoItem: React.FC<Props> = ({
   onToggle,
   onDelete,
   loading = false,
+  isDeleting,
 }) => {
   const handleDelete = async (id: number): Promise<void> => {
     if (!window.confirm('Are you sure you want to delete this todo?')) {
@@ -61,8 +63,9 @@ export const TodoItem: React.FC<Props> = ({
         data-cy="TodoDelete"
         title="Delete todo"
         onClick={() => handleDelete(todo.id)}
+        disabled={isDeleting}
       >
-        ×
+        {isDeleting ? 'Deleting...' : '×'}
       </button>
 
       {loading && (

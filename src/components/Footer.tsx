@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Todo } from '../types/Todo';
 import { FilterBy } from '../types/FilterBy';
 import classNames from 'classnames';
+import { ClearCompletedButton } from './ClearCompletedButton';
 
 export interface FooterProps {
   todos: Todo[];
@@ -14,50 +15,42 @@ export interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({
   todos,
   filterBy,
-  setFilterBy = () => {},
-  onClearCompleted = () => Promise.resolve(),
+  setFilterBy,
+  onClearCompleted,
   isClearingCompleted = false,
 }) => {
   const amountOfActiveTodo = todos.filter(todo => !todo.completed).length;
-  const hasCompletedTodo = todos.some(todo => todo.completed);
 
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter" aria-live="polite">
-        {amountOfActiveTodo} items left
+        {amountOfActiveTodo} {amountOfActiveTodo === 1 ? 'item' : 'items'} left
       </span>
 
       {/* Active link should have the 'selected' class */}
       <nav className="filter" aria-label="Todo Filters" data-cy="Filter">
-        {Object.entries(FilterBy as Record<string, FilterBy>).map(
-          ([filterKey, filterValue]) => (
-            <a
-              key={filterKey}
-              href={`#/${filterValue}`}
-              className={classNames('filter__link', {
-                selected: filterBy === filterValue,
-              })}
-              data-cy={`FilterLink${filterKey}`}
-              onClick={() => setFilterBy(filterValue)}
-              aria-current={filterBy === filterValue ? 'page' : undefined}
-            >
-              {filterKey}
-            </a>
-          ),
-        )}
+        {Object.values(FilterBy).map(filterValue => (
+          <a
+            key={filterValue}
+            href={`#/${filterValue}`}
+            className={classNames('filter__link', {
+              selected: filterBy === filterValue,
+            })}
+            data-cy={`FilterLink${filterValue}`}
+            onClick={() => setFilterBy(filterValue)}
+            aria-current={filterBy === filterValue ? 'page' : undefined}
+          >
+            {filterValue}
+          </a>
+        ))}
       </nav>
 
       {/* This button should be disabled if there are no completed todos */}
-      <button
-        type="button"
-        className="todoapp__clear-completed"
-        data-cy="ClearCompletedButton"
-        disabled={!hasCompletedTodo || isClearingCompleted}
-        aria-disabled={!hasCompletedTodo}
-        onClick={onClearCompleted}
-      >
-        Clear completed
-      </button>
+      <ClearCompletedButton
+        onClearCompleted={onClearCompleted}
+        isClearingCompleted={isClearingCompleted}
+        hasCompletedTodo={todos.some(todo => todo.completed)}
+      />
     </footer>
   );
 };
@@ -72,6 +65,6 @@ Footer.propTypes = {
       completed: PropTypes.bool.isRequired,
     }).isRequired,
   ).isRequired,
-  filterBy: PropTypes.oneOf(Object.values(FilterBy)).isRequired,
+  filterBy: PropTypes.oneOf(Object.values(FilterBy) as FilterBy[]).isRequired,
   setFilterBy: PropTypes.func.isRequired,
 };

@@ -3,13 +3,34 @@ import { client } from '../utils/fetchClient';
 
 export const USER_ID = 2591;
 
-// This is a constant that contains the user ID.
-//Please use it for all your requests to the Students API. For example:
+export const getTodos = async (): Promise<Todo[]> => {
+  try {
+    const response = await client.get<Todo[]>(`/todos?userId=${USER_ID}`);
 
-//https://mate.academy/students-api/todos?userId=2591;
-
-export const getTodos = () => {
-  return client.get<Todo[]>(`/todos?userId=${USER_ID}`);
+    return response;
+  } catch (error) {
+    throw new Error('Unable to load todos');
+  }
 };
 
-// Add more methods here
+export const addTodo = async (title: string): Promise<Todo> => {
+  try {
+    const response = await client.post<Todo>('/todos', {
+      userId: USER_ID,
+      title,
+      completed: false,
+    });
+
+    return response;
+  } catch (error) {
+    throw new Error('Unable to add todo');
+  }
+};
+
+export const deleteTodo = async (id: number): Promise<void> => {
+  try {
+    await client.delete(`/todos/${id}`);
+  } catch (error) {
+    throw new Error('Unable to delete todo');
+  }
+};
