@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
+import '../styles/todo.scss';
 
 type Props = {
   errorMessage: string;
@@ -32,6 +33,7 @@ export const ErrorModal: React.FC<Props> = ({ errorMessage, onClearError }) => {
         type="button"
         className="delete"
         aria-label="Close error notification"
+        onClick={onClearError}
       />
       {errorMessage}
     </div>

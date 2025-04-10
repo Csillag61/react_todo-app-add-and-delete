@@ -8,20 +8,17 @@ type Props = {
   onToggle: (todoId: number) => Promise<void>;
   onDelete?: (todoId: number) => Promise<void>;
   isDeleting?: boolean;
+  isToggling: boolean;
 };
 
 export const TodoItem: React.FC<Props> = ({
   todo,
   onToggle,
-  onDelete,
+  onDelete = async () => {},
   loading = false,
   isDeleting,
 }) => {
   const handleDelete = async (id: number): Promise<void> => {
-    if (!window.confirm('Are you sure you want to delete this todo?')) {
-      return;
-    }
-
     try {
       if (onDelete) {
         await onDelete(id);
@@ -49,7 +46,6 @@ export const TodoItem: React.FC<Props> = ({
           title="Toggle todo status"
           onChange={() => onToggle(todo.id)}
           aria-label="Mark as completed"
-          aria-checked={todo.completed}
         />
       </label>
 

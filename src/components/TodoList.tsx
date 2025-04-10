@@ -7,6 +7,7 @@ type Props = {
   onDeleteTodo: (todoId: number) => Promise<void>;
   isDeleting: number | null;
   onToggleTodo: (todoId: number) => Promise<void>;
+  isToggling: number | null;
 };
 
 export const TodoList: React.FC<Props> = ({
@@ -14,6 +15,7 @@ export const TodoList: React.FC<Props> = ({
   onToggleTodo,
   onDeleteTodo,
   isDeleting,
+  isToggling,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
@@ -23,7 +25,9 @@ export const TodoList: React.FC<Props> = ({
           todo={todo}
           onToggle={onToggleTodo}
           onDelete={onDeleteTodo} // Pass the delete function
-          isDeleting={isDeleting === todo.id} // Pass deletion state for the specific todo
+          isDeleting={isDeleting === todo.id}
+          isToggling={isToggling === todo.id} // Pass the toggle state
+          // Pass deletion state for the specific todo
         />
       ))}
     </section>

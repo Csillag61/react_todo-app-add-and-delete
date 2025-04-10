@@ -1,27 +1,21 @@
+/* eslint-disable max-len */
 import React from 'react';
 
-export const Header: React.FC = () => {
+export const Header: React.FC<{ handleToggle: () => Promise<void> }> = ({
+  handleToggle,
+}) => {
   return (
     <header className="todoapp__header">
-      {/* this button should have `active` class only if all todos are completed */}
+      {/* This button should have the `active` class only if all todos are completed */}
       <button
         type="button"
         className="todoapp__toggle-all active"
         data-cy="ToggleAllButton"
         title="Toggle all todos"
+        onClick={handleToggle}
       >
         Toggle All
       </button>
-
-      {/* Add a todo on form submit */}
-      <form>
-        <input
-          data-cy="NewTodoField"
-          type="text"
-          className="todoapp__new-todo"
-          placeholder="What needs to be done?"
-        />
-      </form>
     </header>
   );
 };

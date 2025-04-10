@@ -2,160 +2,53 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { TodoManager } from './utils/TodoManager';
 import { Header } from './components/Header';
 import { TodoList } from './components/TodoList';
-import { Todo } from './types/Todo';
-import { USER_ID, getTodos } from './api/todos';
-import { client } from './utils/fetchClient';
-import { Errors } from './types/Errors';
 import { Footer } from './components/Footer';
+import { AddTodoForm } from './components/AddTodoForm';
 import { ErrorModal } from './components/ErrorModal';
-import { FilterBy } from './types/FilterBy';
+import { Errors } from './types/Errors';
 import { Loader } from './components/Loader';
 import { TodoItem } from './components/TodoItem';
-import { AddTodoForm } from './components/AddTodoForm';
-
-const filter = (todos: Todo[], filterBy: FilterBy) => {
-  switch (filterBy) {
-    case FilterBy.Active:
-      return todos.filter(todo => !todo.completed);
-    case FilterBy.Completed:
-      return todos.filter(todo => todo.completed);
-    case FilterBy.All:
-    default:
-      return todos;
-  }
-};
+import './styles/todoapp.scss';
+// import { Todo } from './types/Todo';
 
 export const App: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [newTodoTitle, setNewTodoTitle] = useState('');
-  const [errorMessage, setErrorMessage] = useState(Errors.DEFAULT);
-  const [filterBy, setFilterBy] = useState(FilterBy.All);
-  const [loading, setLoading] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-  const [isDeleting, setIsDeleting] = useState<number | null>(null); // Track the ID of the todo being deleted
-  const [isClearingCompleted, setIsClearingCompleted] = useState(false);
-
-  useEffect(() => {
-    setLoading(true); // Start loading
-    getTodos()
-      .then(todosFromServer => {
-        setTodos(todosFromServer);
-      })
-      .catch(() => {
-        setErrorMessage(Errors.LOAD);
-      })
-      .finally(() => {
-        setLoading(false); // Stop loading
-      });
-  }, []);
-
-  const handleAddTodo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedTitle = newTodoTitle.trim();
-
-    if (!trimmedTitle) {
-      setErrorMessage(Errors.EMPTY);
-
-      return;
-    }
-
-    setIsAdding(true);
-
-    const newTempTodo: Todo = {
-      id: 0,
-      title: trimmedTitle,
-      completed: false,
-      userId: USER_ID, // Replace with your userId
-    };
-
-    setTempTodo(newTempTodo);
-
-    try {
-      const newTodo = await client.post<Todo>('/todos', {
-        title: trimmedTitle,
-        completed: false,
-        userId: USER_ID,
-      });
-
-      setTodos(prev => [...prev, newTodo]);
-      setNewTodoTitle('');
-    } catch (err) {
-      setErrorMessage(Errors.ADD);
-      setTempTodo(null);
-    } finally {
-      setTempTodo(null);
-      setIsAdding(false);
-    }
-  };
-
-  const handleDeleteTodo = async (todoId: number) => {
-    setIsDeleting(todoId);
-
-    try {
-      await client.delete(`/todos/${todoId}`);
-      setTodos(prev => prev.filter(todo => todo.id !== todoId));
-    } catch (err) {
-      setErrorMessage(Errors.DELETE);
-    } finally {
-      setIsDeleting(null);
-    }
-  };
-
-  const handleClearCompleted = async () => {
-    setIsClearingCompleted(true);
-    const completedTodos = todos.filter(todo => todo.completed);
-
-    try {
-      await Promise.all(
-        completedTodos.map(todo => client.delete(`/todos/${todo.id}`)),
-      );
-      setTodos(prev => prev.filter(todo => !todo.completed));
-    } catch (err) {
-      setErrorMessage(Errors.DELETE_ID);
-    } finally {
-      setIsClearingCompleted(false);
-    }
-  };
-
-  const onToggleTodo = async (todoId: number) => {
-    const todoToToggle = todos.find(todo => todo.id === todoId);
-
-    if (!todoToToggle) {
-      return;
-    }
-
-    try {
-      const updatedTodo = await client.patch<Todo>(`/todos/${todoId}`, {
-        completed: !todoToToggle.completed,
-      });
-
-      setTodos(prev =>
-        prev.map(todo => (todo.id === todoId ? updatedTodo : todo)),
-      );
-    } catch (err) {
-      setErrorMessage(Errors.TOGGLE);
-    }
-  };
-
-  const filteredTodos = filter(todos, filterBy);
-
-  useEffect(() => {
-    if (errorMessage !== Errors.DEFAULT) {
-      const timer = setTimeout(() => setErrorMessage(Errors.DEFAULT), 3000);
-
-      return () => clearTimeout(timer);
-    }
-
-    return undefined;
-  }, [errorMessage]);
+  const {
+    todos,
+    tempTodo,
+    loading,
+    todosToDisplay,
+    //setTodos,
+    errorMessage,
+    setErrorMessage,
+    isAdding,
+    //setIsAdding,
+    handleAddTodo,
+    handleClearCompleted,
+    handleDeleteTodo,
+    isDeleting,
+    //setIsDeleting,
+    isToggling,
+    //setIsToggling,
+    isClearingCompleted,
+    //setIsClearingCompleted,
+    handleToggleAllTodos,
+    onToggleTodo,
+    filterBy,
+    setFilterBy,
+    //loading,
+    //setloading,
+    //filteredTodos,
+  } = TodoManager();
 
   return (
     <div className="todoapp">
-      <Header />
+      <div className="todoapp__title">todo</div>
+      <Header handleToggle={handleToggleAllTodos} />
       <AddTodoForm
         newTodoTitle={newTodoTitle}
         setNewTodoTitle={setNewTodoTitle}
@@ -167,10 +60,11 @@ export const App: React.FC = () => {
       ) : (
         <>
           <TodoList
-            todos={filteredTodos}
-            onDeleteTodo={handleDeleteTodo}
-            onToggleTodo={onToggleTodo}
-            isDeleting={isDeleting}
+            todos={todosToDisplay} // Pass the list of todos
+            onToggleTodo={onToggleTodo} // Toggle logic
+            onDeleteTodo={handleDeleteTodo} // Delete logic
+            isDeleting={isDeleting} // Pass the deleting state
+            isToggling={isToggling} // Pass the toggling state
           />
           <Footer
             todos={todos}
@@ -188,6 +82,7 @@ export const App: React.FC = () => {
           isDeleting={isDeleting === tempTodo.id}
           loading={true}
           onToggle={() => Promise.resolve()}
+          isToggling={isToggling === tempTodo.id}
         />
       )}
       {errorMessage !== Errors.DEFAULT && (
